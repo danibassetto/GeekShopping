@@ -352,21 +352,15 @@ namespace IdentityServerHost.Quickstart.UI
                 LogoutId = logoutId
             };
 
-            if (User?.Identity.IsAuthenticated == true)
+            if (User?.Identity?.IsAuthenticated == true)
             {
                 var idp = User.FindFirst(JwtClaimTypes.IdentityProvider)?.Value;
-                if (idp != null && idp != Duende.IdentityServer.IdentityServerConstants.LocalIdentityProvider)
+                if (idp != null && idp != IdentityServerConstants.LocalIdentityProvider)
                 {
-                    var providerSupportsSignout = await HttpContext.GetSchemeSupportsSignOutAsync(idp);
+                    var providerSupportsSignout = await GetSchemeSupportsSignOutAsync(HttpContext, idp);
                     if (providerSupportsSignout)
                     {
-                        if (vm.LogoutId == null)
-                        {
-                            // if there's no current logout context, we need to create one
-                            // this captures necessary info from the current logged in user
-                            // before we signout and redirect away to the external IdP for signout
-                            vm.LogoutId = await _interaction.CreateLogoutContextAsync();
-                        }
+                        vm.LogoutId ??= await _interaction.CreateLogoutContextAsync();
 
                         vm.ExternalAuthenticationScheme = idp;
                     }
@@ -374,6 +368,13 @@ namespace IdentityServerHost.Quickstart.UI
             }
 
             return vm;
+        }
+
+        internal static async Task<bool> GetSchemeSupportsSignOutAsync(HttpContext context, string scheme)
+        {
+            var provider = context.RequestServices.GetRequiredService<IAuthenticationHandlerProvider>();
+            var handler = await provider.GetHandlerAsync(context, scheme);
+            return (handler is IAuthenticationSignOutHandler);
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using GeekShopping.Web.Models;
 using GeekShopping.Web.Services.Interfaces;
+using GeekShopping.Web.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GeekShopping.Web.Controllers;
@@ -20,6 +22,7 @@ public class ProductController(IProductService productService) : Controller
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> Create(ProductModel model)
     {
         if (ModelState.IsValid)
@@ -41,6 +44,7 @@ public class ProductController(IProductService productService) : Controller
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> Update(ProductModel model)
     {
         if (ModelState.IsValid)
@@ -62,6 +66,7 @@ public class ProductController(IProductService productService) : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = Role.Admin)]
     public async Task<IActionResult> Delete(ProductModel model)
     {
         var response = await _productService.Delete(model.Id);

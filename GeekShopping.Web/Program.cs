@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpClient<IProductService, ProductService>(
-    c => c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ProductAPI"]!)
+    c => c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ProductAPI"])
 );
 
 // Add services to the container.
@@ -33,8 +33,11 @@ builder.Services.AddAuthentication(options => {
 
 var app = builder.Build();
 
+// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
+{
     app.UseExceptionHandler("/Home/Error");
+}
 
 app.UseHttpsRedirection();
 

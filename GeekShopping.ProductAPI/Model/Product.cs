@@ -14,7 +14,7 @@ public class Product : BaseEntity
 
     [Column("preco")]
     [Required]
-    [Range(1,10000)]
+    [Range(1, 10000)]
     public decimal Price { get; set; }
 
     [Column("descricao")]

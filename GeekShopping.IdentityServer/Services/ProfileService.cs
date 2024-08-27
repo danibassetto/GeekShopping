@@ -1,7 +1,7 @@
 ﻿using Duende.IdentityServer.Extensions;
 using Duende.IdentityServer.Models;
 using Duende.IdentityServer.Services;
-using GeekShopping.IdentityServer.Model.Context;
+using GeekShopping.IdentityServer.Model;
 using IdentityModel;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
@@ -42,7 +42,7 @@ public class ProfileService : IProfileService
                 claims.Add(new Claim(JwtClaimTypes.Role, role));
                 if (_roleManager.SupportsRoleClaims)
                 {
-                    IdentityRole identityRole = await _roleManager.FindByNameAsync(role);
+                    IdentityRole? identityRole = await _roleManager.FindByNameAsync(role);
                     if (identityRole != null)
                     {
                         claims.AddRange(await _roleManager

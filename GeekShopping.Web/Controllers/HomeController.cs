@@ -7,17 +7,11 @@ using System.Diagnostics;
 
 namespace GeekShopping.Web.Controllers;
 
-public class HomeController : Controller
+public class HomeController(ILogger<HomeController> logger, IProductService productService, ICartService cartService) : Controller
 {
-    private readonly ILogger<HomeController> _logger;
-    private readonly IProductService _productService;
-
-    public HomeController(ILogger<HomeController> logger,
-        IProductService productService)
-    {
-        _logger = logger;
-        _productService = productService;
-    }
+    private readonly ILogger<HomeController> _logger = logger;
+    private readonly IProductService _productService = productService;
+    private readonly ICartService _cartService = cartService;
 
     public async Task<IActionResult> Index()
     {
@@ -30,6 +24,38 @@ public class HomeController : Controller
     {
         string token = await HttpContext.GetTokenAsync("access_token") ?? string.Empty;
         var model = await _productService.GetById(id, token);
+        return View(model);
+    }
+
+    [HttpPost]
+    [ActionName("Details")]
+    [Authorize]
+    public async Task<IActionResult> DetailsPost(ProductViewModel model)
+    {
+        string token = await HttpContext.GetTokenAsync("access_token") ?? string.Empty;
+
+        CartViewModel cart = new()
+        {
+            CartHeader = new CartHeaderViewModel
+            {
+                UserId = User.Claims.Where(u => u.Type == "sub")?.FirstOrDefault()?.Value
+            }
+        };
+
+        CartDetailViewModel cartDetail = new()
+        {
+            Count = model.Count,
+            ProductId = model.Id,
+            Product = await _productService.GetById(model.Id, token)
+        };
+
+        List<CartDetailViewModel> cartDetails = [];
+        cartDetails.Add(cartDetail);
+        cart.ListCartDetail = cartDetails;
+
+        var response = await _cartService.AddItem(cart, token);
+        if (response != null)
+            return RedirectToAction(nameof(Index));
         return View(model);
     }
 

@@ -109,13 +109,13 @@ public class CartRepository(MySQLContext context, IMapper mapper) : ICartReposit
             //If CartHeader is not null
             //Check if CartDetails has same product
             var cartDetail = await _context.CartDetails.AsNoTracking().FirstOrDefaultAsync(
-                p => p.ProductId == vo.ListCartDetail!.FirstOrDefault()!.ProductId &&
+                p => p.ProductId == cart.ListCartDetail!.FirstOrDefault()!.ProductId &&
                 p.CartHeaderId == cartHeader.Id);
 
             if (cartDetail == null)
             {
                 //Create CartDetails
-                cart.ListCartDetail!.FirstOrDefault()!.CartHeaderId = cart.CartHeader!.Id;
+                cart.ListCartDetail!.FirstOrDefault()!.CartHeaderId = cartHeader!.Id;
                 cart.ListCartDetail!.FirstOrDefault()!.Product = null;
                 _context.CartDetails.Add(cart.ListCartDetail!.FirstOrDefault()!);
                 await _context.SaveChangesAsync();

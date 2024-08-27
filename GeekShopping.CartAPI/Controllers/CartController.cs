@@ -18,8 +18,8 @@ public class CartController(ICartRepository repository) : ControllerBase
         return Ok(cart);
     }
 
-    [HttpPost("Create")]
-    public async Task<ActionResult<CartVO>> Crete(CartVO vo)
+    [HttpPost("AddItem")]
+    public async Task<ActionResult<CartVO>> AddItem(CartVO vo)
     {
         var cart = await _repository.SaveOrUpdate(vo);
         if (cart == null) return NotFound();

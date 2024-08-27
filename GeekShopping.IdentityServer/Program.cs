@@ -62,7 +62,7 @@ app.UseIdentityServer();
 
 app.UseAuthorization();
 
-initializer.Initialize();
+initializer!.Initialize();
 
 app.MapControllerRoute(
     name: "default",

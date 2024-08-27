@@ -10,7 +10,7 @@ public class Product : BaseEntity
     [Column("nome")]
     [Required]
     [StringLength(150)]
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
     [Column("preco")]
     [Required]
@@ -19,13 +19,13 @@ public class Product : BaseEntity
 
     [Column("descricao")]
     [StringLength(500)]
-    public string Description { get; set; }
+    public string? Description { get; set; }
 
     [Column("nome_categoria")]
     [StringLength(50)]
-    public string CategoryName { get; set; }
+    public string? CategoryName { get; set; }
 
     [Column("image_url")]
     [StringLength(300)]
-    public string ImageUrl { get; set; }
+    public string? ImageUrl { get; set; }
 }

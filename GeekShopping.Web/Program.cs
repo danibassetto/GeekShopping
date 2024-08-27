@@ -5,13 +5,14 @@ using Microsoft.AspNetCore.Authentication;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpClient<IProductService, ProductService>(
-    c => c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ProductAPI"])
+    c => c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ProductAPI"]!)
 );
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddAuthentication(options => {
+builder.Services.AddAuthentication(options =>
+{
     options.DefaultScheme = "Cookies";
     options.DefaultChallengeScheme = "oidc";
 })

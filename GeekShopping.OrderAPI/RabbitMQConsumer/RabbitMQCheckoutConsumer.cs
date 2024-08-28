@@ -1,6 +1,7 @@
 ﻿using GeekShopping.CartAPI.Repository;
 using GeekShopping.OrderAPI.Messages;
 using GeekShopping.OrderAPI.Model;
+using GeekShopping.OrderAPI.RabbitMQProducer;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
@@ -13,10 +14,12 @@ public class RabbitMQCheckoutConsumer : BackgroundService
     private readonly OrderRepository _repository;
     private IConnection _connection;
     private IModel _channel;
+    private IRabbitMQMessageProducer _rabbitMQMessageProducer;
 
-    public RabbitMQCheckoutConsumer(OrderRepository repository)
+    public RabbitMQCheckoutConsumer(OrderRepository repository, IRabbitMQMessageProducer rabbitMQMessageProducer)
     {
         _repository = repository;
+        _rabbitMQMessageProducer = rabbitMQMessageProducer;
         var factory = new ConnectionFactory
         {
             HostName = "localhost",
@@ -25,7 +28,7 @@ public class RabbitMQCheckoutConsumer : BackgroundService
         };
         _connection = factory.CreateConnection();
         _channel = _connection.CreateModel();
-        _channel.QueueDeclare(queue: "checkoutqueue", false, false, false, arguments: null);  
+        _channel.QueueDeclare(queue: "checkoutqueue", false, false, false, arguments: null);
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -50,7 +53,7 @@ public class RabbitMQCheckoutConsumer : BackgroundService
             UserId = vo.UserId,
             FirstName = vo.FirstName,
             LastName = vo.LastName,
-            ListOrderDetail = [],
+            ListOrderDetail = new List<OrderDetail>(),
             CardNumber = vo.CardNumber,
             CouponCode = vo.CouponCode,
             CVV = vo.CVV,
@@ -78,5 +81,21 @@ public class RabbitMQCheckoutConsumer : BackgroundService
         }
 
         await _repository.Create(order);
+
+        PaymentVO payment = new()
+        {
+            Name = order.FirstName + " " + order.LastName,
+            CardNumber = order.CardNumber,
+            CVV = order.CVV,
+            ExpiryMonthYear = order.ExpiryMonthYear,
+            OrderId = order.Id,
+            PurchaseAmount = order.PurchaseAmount,
+            Email = order.Email
+        };
+        try
+        {
+            _rabbitMQMessageProducer.SendMessage(payment, "orderpaymentprocessqueue");
+        }
+        catch (Exception) { throw; }
     }
 }

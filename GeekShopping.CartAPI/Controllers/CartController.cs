@@ -65,20 +65,22 @@ public class CartController(ICartRepository repository, ICouponRepository coupon
     [HttpPost("Checkout")]
     public async Task<ActionResult<CheckoutHeaderVO>> Checkout(CheckoutHeaderVO vo)
     {
-        string token = Request.Headers.Authorization!;
+        string token = Request.Headers["Authorization"]!;
 
         if (vo?.UserId == null) return BadRequest();
         var cart = await _repository.GetByUserId(vo.UserId);
         if (cart == null) return NotFound();
         if (!string.IsNullOrEmpty(vo.CouponCode))
         {
-            CouponVO? coupon = await _couponRepository.GetCoupon(vo.CouponCode, token);
+            CouponVO? coupon = await _couponRepository.GetCoupon(vo.CouponCode, token.Replace("Bearer ", ""));
             if (vo.DiscountAmount != coupon!.DiscountAmount) return StatusCode(412);
         }
         vo.ListCartDetail = cart.ListCartDetail;
         vo.DateTime = DateTime.Now;
 
         _rabbitMQMessageProducer.SendMessage(vo, "checkoutqueue");
+
+        await _repository.Clear(vo.UserId);
 
         return Ok(vo);
     }

@@ -10,12 +10,9 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connection = builder.Configuration["MySqlConnection:MySqlConnectionString"];
+var connection = builder.Configuration["MySQlConnection:MySQlConnectionString"];
 
-builder.Services.AddDbContext<MySQLContext>(options => options.UseMySql(
-    connection,
-    new MySqlServerVersion(new Version(8, 0, 29)))
-);
+builder.Services.AddDbContext<MySQLContext>(options => options.UseMySql(connection, new MySqlServerVersion(new Version(8, 0, 29))));
 
 IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
 builder.Services.AddSingleton(mapper);
@@ -23,13 +20,12 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<ICouponRepository, CouponRepository>();
+
 builder.Services.AddSingleton<IRabbitMQMessageProducer, RabbitMQMessageProducer>();
 
-builder.Services.AddHttpClient<ICouponRepository, CouponRepository>(
-    c => c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:CouponAPI"]!)
-);
-
 builder.Services.AddControllers();
+
+builder.Services.AddHttpClient<ICouponRepository, CouponRepository>(s => s.BaseAddress = new Uri(builder.Configuration["ServiceUrls:CouponAPI"]));
 
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
@@ -64,8 +60,7 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer"
     });
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement {
         {
             new OpenApiSecurityScheme
             {
@@ -80,7 +75,7 @@ builder.Services.AddSwaggerGen(c =>
             },
             new List<string> ()
         }
-     });
+    });
 });
 
 var app = builder.Build();
@@ -88,11 +83,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "GeekShopping.CartAPI v1"));
 }
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
 app.UseAuthentication();
 
 app.UseAuthorization();

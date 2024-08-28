@@ -7,12 +7,12 @@ namespace GeekShopping.CouponAPI.Controllers;
 
 [Route("api/v1/[controller]")]
 [ApiController]
-[Authorize]
 public class CouponController(ICouponRepository repository) : ControllerBase
 {
     private readonly ICouponRepository _repository = repository ?? throw new ArgumentNullException(nameof(repository));
 
     [HttpGet("{code}")]
+    [Authorize]
     public async Task<ActionResult<CouponVO>> GetByCode(string code)
     {
         var coupon = await _repository.GetByCode(code);

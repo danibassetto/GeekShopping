@@ -17,6 +17,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\GeekShopping.PaymentProcessor\GeekShopping.PaymentProcessor.csproj" />
 		<ProjectReference Include="..\GeekShoppping.MessageBus\GeekShoppping.MessageBus.csproj" />
 	</ItemGroup>
 

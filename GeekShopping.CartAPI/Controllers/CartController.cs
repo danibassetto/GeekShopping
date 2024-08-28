@@ -1,4 +1,5 @@
 ﻿using GeekShopping.CartAPI.Data.ValueObjects;
+using GeekShopping.CartAPI.Messages;
 using GeekShopping.CartAPI.Repository.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,11 +35,40 @@ public class CartController(ICartRepository repository) : ControllerBase
         return Ok(cart);
     }
 
-    [HttpDelete("Remove/{id}")]
-    public async Task<ActionResult<CartVO>> Remove(int id)
+    [HttpDelete("RemoveItem/{id}")]
+    public async Task<ActionResult<CartVO>> RemoveItem(int id)
     {
-        var status = await _repository.Remove(id);
+        var status = await _repository.RemoveItem(id);
         if (!status) return BadRequest();
         return Ok(status);
+    }
+
+    [HttpPost("ApplyCoupon")]
+    public async Task<ActionResult<CartVO>> ApplyCoupon(CartVO vo)
+    {
+        var status = await _repository.ApplyCoupon(vo.CartHeader!.UserId!, vo.CartHeader.CouponCode!);
+        if (!status) return NotFound();
+        return Ok(status);
+    }
+
+    [HttpDelete("RemoveCoupon/{userId}")]
+    public async Task<ActionResult<CartVO>> RemoveCoupon(string userId)
+    {
+        var status = await _repository.RemoveCoupon(userId);
+        if (!status) return NotFound();
+        return Ok(status);
+    }
+
+    [HttpPost("checkout")]
+    public async Task<ActionResult<CheckoutHeaderVO>> Checkout(CheckoutHeaderVO vo)
+    {
+        var cart = await _repository.GetByUserId(vo.UserId!);
+        if (cart == null) return NotFound();
+        vo.ListCartDetail = cart.ListCartDetail;
+        vo.DateTime = DateTime.Now;
+
+        //TASK RabbitMQ logic comes here!!!
+
+        return Ok(vo);
     }
 }

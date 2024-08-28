@@ -14,7 +14,28 @@ public class CartRepository(MySQLContext context, IMapper mapper) : ICartReposit
 
     public async Task<bool> ApplyCoupon(string userId, string couponCode)
     {
-        throw new NotImplementedException();
+        var header = await _context.CartHeaders.FirstOrDefaultAsync(c => c.UserId == userId);
+        if (header != null)
+        {
+            header.CouponCode = couponCode;
+            _context.CartHeaders.Update(header);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        return false;
+    }
+
+    public async Task<bool> RemoveCoupon(string userId)
+    {
+        var header = await _context.CartHeaders.FirstOrDefaultAsync(c => c.UserId == userId);
+        if (header != null)
+        {
+            header.CouponCode = "";
+            _context.CartHeaders.Update(header);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        return false;
     }
 
     public async Task<bool> Clear(string userId)
@@ -46,12 +67,7 @@ public class CartRepository(MySQLContext context, IMapper mapper) : ICartReposit
         return _mapper.Map<CartVO>(cart);
     }
 
-    public async Task<bool> RemoveCoupon(string userId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<bool> Remove(long cartDetailsId)
+    public async Task<bool> RemoveItem(long cartDetailsId)
     {
         try
         {

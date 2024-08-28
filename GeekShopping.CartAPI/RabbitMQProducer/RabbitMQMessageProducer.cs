@@ -4,16 +4,16 @@ using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json;
 
-namespace GeekShopping.CartAPI.RabbitMQSender;
+namespace GeekShopping.CartAPI.RabbitMQProducer;
 
-public class RabbitMQMessageSender : IRabbitMQMessageSender
+public class RabbitMQMessageProducer : IRabbitMQMessageProducer
 {
     private readonly string _hostName;
     private readonly string _password;
     private readonly string _userName;
     private IConnection? _connection;
 
-    public RabbitMQMessageSender()
+    public RabbitMQMessageProducer()
     {
         _hostName = "localhost";
         _password = "guest";
@@ -36,7 +36,7 @@ public class RabbitMQMessageSender : IRabbitMQMessageSender
         channel.BasicPublish(exchange: "", routingKey: queueName, basicProperties: null, body: body);
     }
 
-    private byte[] GetMessageAsByteArray(BaseMessage message)
+    private static byte[] GetMessageAsByteArray(BaseMessage message)
     {
         var options = new JsonSerializerOptions
         {

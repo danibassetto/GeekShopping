@@ -1,9 +1,6 @@
-using AutoMapper;
-using GeekShopping.CartAPI.Config;
-using GeekShopping.CartAPI.Model.Context;
-using GeekShopping.CartAPI.RabbitMQProducer;
 using GeekShopping.CartAPI.Repository;
-using GeekShopping.CartAPI.Repository.Interfaces;
+using GeekShopping.OrderAPI.MessageConsumer;
+using GeekShopping.OrderAPI.Model.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -17,17 +14,14 @@ builder.Services.AddDbContext<MySQLContext>(options => options.UseMySql(
     new MySqlServerVersion(new Version(8, 0, 29)))
 );
 
-IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
-builder.Services.AddSingleton(mapper);
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+var builderDbContextOptionsBuilder = new DbContextOptionsBuilder<MySQLContext>();
+builderDbContextOptionsBuilder.UseMySql(connection,
+            new MySqlServerVersion(
+                new Version(8, 0, 5)));
 
-builder.Services.AddScoped<ICartRepository, CartRepository>();
-builder.Services.AddScoped<ICouponRepository, CouponRepository>();
-builder.Services.AddSingleton<IRabbitMQMessageProducer, RabbitMQMessageProducer>();
+builder.Services.AddSingleton(new OrderRepository(builderDbContextOptionsBuilder.Options));
 
-builder.Services.AddHttpClient<ICouponRepository, CouponRepository>(
-    c => c.BaseAddress = new Uri(builder.Configuration["ServiceUrls:CouponAPI"]!)
-);
+builder.Services.AddHostedService<RabbitMQCheckoutConsumer>();
 
 builder.Services.AddControllers();
 
@@ -53,7 +47,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "GeekShopping.CartAPI", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "GeekShopping.OrderAPI", Version = "v1" });
     c.EnableAnnotations();
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {

@@ -1,8 +1,8 @@
 ﻿using GeekShopping.MessageBus;
 
-namespace GeekShopping.CartAPI.RabbitMQSender;
+namespace GeekShopping.CartAPI.RabbitMQProducer;
 
-public interface IRabbitMQMessageSender
+public interface IRabbitMQMessageProducer
 {
     void SendMessage(BaseMessage baseMessage, string queueName);
 }

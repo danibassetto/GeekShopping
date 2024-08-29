@@ -72,9 +72,4 @@ public class CartService(HttpClient client) : ICartService
             return "Coupon Price has changed, please confirm!";
         else throw new Exception("Something went wrong when calling API");
     }
-
-    public async Task<bool> Clear(string userId, string token)
-    {
-        throw new NotImplementedException();
-    }
 }

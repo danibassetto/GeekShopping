@@ -1,4 +1,4 @@
-using GeekShopping.PaymentAPI.MessageConsumer;
+using GeekShopping.PaymentAPI.RabbitMQConsumer;
 using GeekShopping.PaymentAPI.RabbitMQProducer;
 using GeekShopping.PaymentProcessor;
 using Microsoft.IdentityModel.Tokens;
@@ -21,14 +21,12 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("ApiScope", policy =>
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("ApiScope", policy =>
     {
         policy.RequireAuthenticatedUser();
         policy.RequireClaim("scope", "geek_shopping");
     });
-});
 
 builder.Services.AddSwaggerGen(c =>
 {

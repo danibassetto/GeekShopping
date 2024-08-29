@@ -7,7 +7,7 @@ using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
 
-namespace GeekShopping.OrderAPI.MessageConsumer;
+namespace GeekShopping.OrderAPI.RabbitMQConsumer;
 
 public class RabbitMQCheckoutConsumer : BackgroundService
 {

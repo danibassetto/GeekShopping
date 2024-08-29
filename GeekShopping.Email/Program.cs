@@ -1,9 +1,7 @@
-using AutoMapper;
-using GeekShopping.CartAPI.Config;
-using GeekShopping.CartAPI.Model.Context;
-using GeekShopping.CartAPI.RabbitMQProducer;
-using GeekShopping.CartAPI.Repository;
-using GeekShopping.CartAPI.Repository.Interfaces;
+using GeekShopping.Email.Model.Context;
+using GeekShopping.Email.RabbitMQConsumer;
+using GeekShopping.Email.Repository;
+using GeekShopping.Email.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -12,20 +10,23 @@ var builder = WebApplication.CreateBuilder(args);
 
 var connection = builder.Configuration["MySQlConnection:MySQlConnectionString"];
 
-builder.Services.AddDbContext<MySQLContext>(options => options.UseMySql(connection, new MySqlServerVersion(new Version(8, 0, 29))));
+builder.Services.AddDbContext<MySQLContext>(options => options.UseMySql(
+    connection,
+    new MySqlServerVersion(new Version(8, 0, 29)))
+);
 
-IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
-builder.Services.AddSingleton(mapper);
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+var dbContextBuilder = new DbContextOptionsBuilder<MySQLContext>();
+dbContextBuilder.UseMySql(
+    connection,
+    new MySqlServerVersion(new Version(8, 0, 29))
+);
 
-builder.Services.AddScoped<ICartRepository, CartRepository>();
-builder.Services.AddScoped<ICouponRepository, CouponRepository>();
+builder.Services.AddSingleton(new EmailRepository(dbContextBuilder.Options));
 
-builder.Services.AddSingleton<IRabbitMQMessageProducer, RabbitMQMessageProducer>();
+builder.Services.AddScoped<IEmailRepository, EmailRepository>();
+builder.Services.AddHostedService<RabbitMQPaymentConsumer>();
 
 builder.Services.AddControllers();
-
-builder.Services.AddHttpClient<ICouponRepository, CouponRepository>(s => s.BaseAddress = new Uri(builder.Configuration["ServiceUrls:CouponAPI"]));
 
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
@@ -47,7 +48,7 @@ builder.Services.AddAuthorizationBuilder()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "GeekShopping.CartAPI", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "GeekShopping.Email", Version = "v1" });
     c.EnableAnnotations();
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -81,12 +82,13 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "GeekShopping.CartAPI v1"));
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "GeekShopping.Email v1"));
 }
 
 app.UseHttpsRedirection();
 
 app.UseRouting();
+
 app.UseAuthentication();
 
 app.UseAuthorization();

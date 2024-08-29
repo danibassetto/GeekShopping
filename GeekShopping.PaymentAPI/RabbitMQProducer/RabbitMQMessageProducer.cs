@@ -12,6 +12,10 @@ public class RabbitMQMessageProducer : IRabbitMQMessageProducer
     private readonly string _password;
     private readonly string _userName;
     private IConnection? _connection;
+    private const string ExchangeName = "DirectPaymentUpdate_Exchange";
+    private const string PaymentEmailUpdateQueueName = "PaymentEmailUpdateQueueName";
+    private const string PaymentOrderUpdateQueueName = "PaymentOrderUpdateQueueName";
+
 
     public RabbitMQMessageProducer()
     {
@@ -20,15 +24,24 @@ public class RabbitMQMessageProducer : IRabbitMQMessageProducer
         _userName = "guest";
     }
 
-    public void SendMessage(BaseMessage message, string queueName)
+    public void SendMessage(BaseMessage message)
     {
         if (ConnectionExists())
         {
             using var channel = _connection!.CreateModel();
-            channel.QueueDeclare(queue: queueName, false, false, false, arguments: null);
+
+            channel.ExchangeDeclare(ExchangeName, ExchangeType.Direct, durable: false);
+            channel.QueueDeclare(PaymentEmailUpdateQueueName, false, false, false, null);
+            channel.QueueDeclare(PaymentOrderUpdateQueueName, false, false, false, null);
+
+            channel.QueueBind(PaymentEmailUpdateQueueName, ExchangeName, "PaymentEmail");
+            channel.QueueBind(PaymentOrderUpdateQueueName, ExchangeName, "PaymentOrder");
+
             byte[] body = GetMessageAsByteArray(message);
             channel.BasicPublish(
-                exchange: "", routingKey: queueName, basicProperties: null, body: body);
+                exchange: ExchangeName, "PaymentEmail", basicProperties: null, body: body);
+            channel.BasicPublish(
+                exchange: ExchangeName, "PaymentOrder", basicProperties: null, body: body);
         }
     }
 

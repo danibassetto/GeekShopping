@@ -1,5 +1,5 @@
 using GeekShopping.CartAPI.Repository;
-using GeekShopping.OrderAPI.MessageConsumer;
+using GeekShopping.OrderAPI.RabbitMQConsumer;
 using GeekShopping.OrderAPI.Model.Context;
 using GeekShopping.OrderAPI.RabbitMQProducer;
 using Microsoft.EntityFrameworkCore;
@@ -40,14 +40,12 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("ApiScope", policy =>
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("ApiScope", policy =>
     {
         policy.RequireAuthenticatedUser();
         policy.RequireClaim("scope", "geek_shopping");
     });
-});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

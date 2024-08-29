@@ -6,7 +6,7 @@ using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
 
-namespace GeekShopping.PaymentAPI.MessageConsumer;
+namespace GeekShopping.PaymentAPI.RabbitMQConsumer;
 
 public class RabbitMQPaymentConsumer : BackgroundService
 {
@@ -59,7 +59,7 @@ public class RabbitMQPaymentConsumer : BackgroundService
 
         try
         {
-            _rabbitMQMessageProducer.SendMessage(paymentResult, "orderpaymentresultqueue");
+            _rabbitMQMessageProducer.SendMessage(paymentResult);
         }
         catch (Exception) { throw; }
     }

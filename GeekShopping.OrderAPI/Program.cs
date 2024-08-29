@@ -1,6 +1,6 @@
 using GeekShopping.CartAPI.Repository;
-using GeekShopping.OrderAPI.RabbitMQConsumer;
 using GeekShopping.OrderAPI.Model.Context;
+using GeekShopping.OrderAPI.RabbitMQConsumer;
 using GeekShopping.OrderAPI.RabbitMQProducer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;

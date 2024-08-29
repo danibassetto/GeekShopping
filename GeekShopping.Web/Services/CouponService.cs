@@ -1,8 +1,8 @@
-﻿using System.Net.Http.Headers;
+﻿using GeekShopping.Web.Models;
+using GeekShopping.Web.Services.Interfaces;
 using GeekShopping.Web.Utils;
 using System.Net;
-using GeekShopping.Web.Services.Interfaces;
-using GeekShopping.Web.Models;
+using System.Net.Http.Headers;
 
 namespace GeekShopping.Web.Services;
 

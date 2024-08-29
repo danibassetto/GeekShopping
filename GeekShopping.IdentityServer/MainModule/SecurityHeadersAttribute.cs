@@ -20,7 +20,7 @@ public class SecurityHeadersAttribute : ActionFilterAttribute
 
             if (!context.HttpContext.Response.Headers.ContainsKey("Content-Security-Policy"))
                 context.HttpContext.Response.Headers["Content-Security-Policy"] = csp;
-            
+
             if (!context.HttpContext.Response.Headers.ContainsKey("X-Content-Security-Policy"))
                 context.HttpContext.Response.Headers["X-Content-Security-Policy"] = csp;
 

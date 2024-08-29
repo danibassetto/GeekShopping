@@ -11,7 +11,7 @@ public class OrderRepository(DbContextOptions<MySQLContext> context) : IOrderRep
 
     public async Task<bool> Create(OrderHeader header)
     {
-        if(header == null) return false;
+        if (header == null) return false;
         await using var _db = new MySQLContext(_context);
         _db.OrderHeader.Add(header);
         await _db.SaveChangesAsync();

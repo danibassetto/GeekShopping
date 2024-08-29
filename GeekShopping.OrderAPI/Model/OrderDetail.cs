@@ -19,7 +19,7 @@ public class OrderDetail : BaseEntity
     public int Count { get; set; }
 
     [Column("nome_produto")]
-    public string ProductName { get; set; }
+    public string? ProductName { get; set; }
 
     [Column("preco")]
     public decimal Price { get; set; }

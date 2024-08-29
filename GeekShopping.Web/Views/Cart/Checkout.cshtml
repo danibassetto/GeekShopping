@@ -70,11 +70,11 @@
 
                             <hr/>
 
-                            @foreach (var item in Model.ListCartDetail)
+                            @foreach (var item in Model.ListCartDetail!)
                             {
                             <div class="row h-100">
                                 <div class="col-6">
-                                    <span style="font-size:20px;">@item.Product.Name</span>
+                                    <span style="font-size:20px;">@item.Product!.Name</span>
                                 </div>
                                 <div class="col-3">
                                     <span style="font-size:17px;">@string.Format("{0:c}", item.Product.Price)</span>

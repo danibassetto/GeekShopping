@@ -1,5 +1,5 @@
-﻿using GeekShopping.OrderAPI.Data.ValueObjects;
-using GeekShopping.MessageBus;
+﻿using GeekShopping.MessageBus;
+using GeekShopping.OrderAPI.Data.ValueObjects;
 
 namespace GeekShopping.OrderAPI.Messages;
 
